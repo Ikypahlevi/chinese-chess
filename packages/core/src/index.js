@@ -1515,3 +1515,5 @@ if (typeof define !== 'undefined')
   });
 
 export { Xiangqi };
+
+export { XiangqiAI } from './ai.js';

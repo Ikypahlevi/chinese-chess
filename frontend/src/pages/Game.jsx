@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { getSocket, initSocket } from '../services/socket.js';
@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar.jsx';
 import Board from '../components/game/Board.jsx';
 import ChatBox from '../components/game/ChatBox.jsx';
 import MoveHistory from '../components/game/MoveHistory.jsx';
+import { Xiangqi, XiangqiAI } from '@cotuong/core';
 
 function Game() {
   const { roomId } = useParams();
@@ -17,9 +18,32 @@ function Game() {
   const [messages, setMessages] = useState([]);
   const [myColor, setMyColor] = useState('spectator');
   const [isGameOver, setIsGameOver] = useState(false);
+  
+  const isAIMode = roomId === 'ai';
+  const aiRef = useRef(null);
+  const localGameRef = useRef(null);
 
   useEffect(() => {
     if (!user) return;
+
+    if (isAIMode) {
+      // Initialize local AI game
+      localGameRef.current = new Xiangqi();
+      aiRef.current = new XiangqiAI(3); // depth 3
+      
+      setMyColor('red');
+      setGameState({
+        roomId: 'ai',
+        redPlayerName: user.username,
+        redPlayerElo: user.elo || 1000,
+        blackPlayerName: 'Máy Tính (AI)',
+        blackPlayerElo: 2000,
+        fen: localGameRef.current.fen(),
+        turn: 'r',
+        history: []
+      });
+      return;
+    }
 
     const socket = initSocket(user.user_id);
 
@@ -80,9 +104,63 @@ function Game() {
       socket.off('gameOver');
       socket.off('error');
     };
-  }, [user, roomId, navigate, location.state]);
+  }, [user, roomId, navigate, location.state, isAIMode]);
 
   const handleMove = (from, to) => {
+    if (isAIMode) {
+      const game = localGameRef.current;
+      if (!game || isGameOver || game.turn() !== myColor.charAt(0)) return;
+
+      const move = game.move({ from, to });
+      if (move) {
+        // Update state for human move
+        setGameState(prev => ({
+          ...prev,
+          fen: game.fen(),
+          turn: game.turn(),
+          history: [...prev.history, { 
+            color: 'red', 
+            from, 
+            to, 
+            piece: move.piece,
+            iccs: move.iccs
+          }]
+        }));
+
+        if (game.game_over()) {
+          setIsGameOver(true);
+          alert('Ván đấu kết thúc! Bạn đã thắng AI!');
+          return;
+        }
+
+        // Trigger AI move
+        setTimeout(() => {
+          const aiMove = aiRef.current.getBestMove(game.fen(), 'b');
+          if (aiMove) {
+            game.move(aiMove.iccs);
+            setGameState(prev => ({
+              ...prev,
+              fen: game.fen(),
+              turn: game.turn(),
+              history: [...prev.history, {
+                color: 'black',
+                from: aiMove.from,
+                to: aiMove.to,
+                piece: aiMove.piece,
+                iccs: aiMove.iccs
+              }]
+            }));
+
+            if (game.game_over()) {
+              setIsGameOver(true);
+              alert('Ván đấu kết thúc! AI đã chiến thắng!');
+            }
+          }
+        }, 100);
+      }
+      return;
+    }
+
     const socket = getSocket();
     if (socket && gameState && !isGameOver) {
       socket.emit('makeMove', {
@@ -94,6 +172,22 @@ function Game() {
   };
 
   const handleSendMessage = (message) => {
+    if (isAIMode) {
+      setMessages(prev => [...prev, {
+        sender: user.username,
+        text: message,
+        time: new Date().toISOString()
+      }]);
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          sender: 'Máy Tính (AI)',
+          text: 'Tôi là AI, tôi chỉ biết đánh cờ, không biết nói chuyện 🤖',
+          time: new Date().toISOString()
+        }]);
+      }, 500);
+      return;
+    }
+
     const socket = getSocket();
     if (socket && gameState) {
       socket.emit('chatMessage', {

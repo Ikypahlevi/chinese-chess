@@ -123,16 +123,25 @@ function Dashboard() {
             <div className="glass-panel p-6">
               <h3 className="text-xl font-serif text-wood mb-4">Sảnh Đấu</h3>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <button 
+                  onClick={() => navigate('/game/ai')}
+                  className="btn-primary !bg-gradient-to-b !from-green-600 !to-green-800 flex flex-col items-center justify-center gap-2 h-32"
+                >
+                  <span className="material-symbols-outlined text-4xl">smart_toy</span>
+                  <span className="text-lg">Đánh Với Máy</span>
+                  <span className="text-xs font-normal opacity-80">(Offline Mode)</span>
+                </button>
+
                 <button 
                   onClick={findMatch}
                   disabled={isFindingMatch}
                   className="btn-primary flex flex-col items-center justify-center gap-2 h-32"
                 >
                   <span className="material-symbols-outlined text-4xl">swords</span>
-                  <span className="text-lg">{isFindingMatch ? 'Đang tìm đối thủ...' : 'Tìm Trận Nhanh'}</span>
+                  <span className="text-lg">{isFindingMatch ? 'Đang tìm...' : 'Tìm Trận'}</span>
                   {waitingPlayers > 0 && (
-                    <span className="text-xs font-normal opacity-80">({waitingPlayers} người đang đợi)</span>
+                    <span className="text-xs font-normal opacity-80">({waitingPlayers} người đợi)</span>
                   )}
                 </button>
 

@@ -24,7 +24,7 @@ function Game() {
   const localGameRef = useRef(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user && !isAIMode) return;
 
     if (isAIMode) {
       // Initialize local AI game
@@ -34,8 +34,8 @@ function Game() {
       setMyColor('red');
       setGameState({
         roomId: 'ai',
-        redPlayerName: user.username,
-        redPlayerElo: user.elo || 1000,
+        redPlayerName: user?.username || 'Khách',
+        redPlayerElo: user?.elo || 1000,
         blackPlayerName: 'Máy Tính (AI)',
         blackPlayerElo: 2000,
         fen: localGameRef.current.fen(),
@@ -174,7 +174,7 @@ function Game() {
   const handleSendMessage = (message) => {
     if (isAIMode) {
       setMessages(prev => [...prev, {
-        sender: user.username,
+        sender: user?.username || 'Khách',
         text: message,
         time: new Date().toISOString()
       }]);
@@ -198,7 +198,7 @@ function Game() {
     }
   };
 
-  if (!gameState || !user) {
+  if (!gameState || (!user && !isAIMode)) {
     return (
       <div className="flex flex-col min-h-screen">
         <Navbar />
@@ -250,10 +250,10 @@ function Game() {
           <div className={`glass-panel p-3 flex justify-between items-center ${isMyTurn && !isGameOver ? 'bg-wood/20 border-wood shadow-lg shadow-wood/10' : 'bg-wood/10'}`}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-ink overflow-hidden border-2 border-wood/30">
-                <img src={user.avatar_url || '/assets/desktop/dashboard.png'} alt="Me" className="w-full h-full object-cover" />
+                <img src={user?.avatar_url || '/assets/desktop/dashboard.png'} alt="Me" className="w-full h-full object-cover" />
               </div>
               <div>
-                <p className="font-bold font-sans">{user.username} (Bạn)</p>
+                <p className="font-bold font-sans">{user?.username || 'Khách'} (Bạn)</p>
                 <p className="text-xs text-wood-light/60">Cầm quân: {myColor === 'red' ? 'Đỏ' : myColor === 'black' ? 'Đen' : 'Khán giả'}</p>
               </div>
             </div>
@@ -278,7 +278,7 @@ function Game() {
           <ChatBox 
             messages={messages} 
             onSendMessage={handleSendMessage} 
-            currentUserId={user.user_id} 
+            currentUserId={user?.user_id || 'guest'} 
           />
         </div>
 

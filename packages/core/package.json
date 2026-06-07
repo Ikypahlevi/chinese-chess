@@ -1,0 +1,7 @@
+{
+  "name": "@cotuong/core",
+  "version": "1.0.0",
+  "description": "Shared Chinese Chess Engine",
+  "main": "src/index.js",
+  "type": "module"
+}

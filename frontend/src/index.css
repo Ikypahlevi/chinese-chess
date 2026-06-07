@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .glass-panel {
+    @apply bg-ink/80 backdrop-blur-md border border-wood/20 shadow-xl rounded-xl;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-b from-wood to-wood-darker text-[#fff] font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-wood/50 transition-all active:scale-95 border border-wood-light/30;
+  }
+  
+  .btn-secondary {
+    @apply bg-ink-light text-wood hover:bg-ink hover:text-wood-light py-2 px-4 rounded-lg transition-all border border-wood/30;
+  }
+
+  .input-glass {
+    @apply w-full bg-ink/40 border-b-2 border-wood/30 focus:border-wood text-wood-light px-4 py-3 outline-none transition-all placeholder:text-wood/30;
+  }
+}
+
+body {
+  @apply bg-ink text-wood-light min-h-screen;
+  background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDNHtpjGsTIcDJLAe9Q6GgL5DkByVexE4sZMfTmcQsZdoB9onzeCCHFF4ijBkDlM-XT6raLwMVxO4oye7AJOxeKeJpJ8PJ6GbTjevoQy2JCvkXs_maQhgsrbbX-J979FYnj57rEmaBnZyWk78HGrKX1pvlKz49lAFxcn4-4c3fYGlN1_UjuDh8LeCtsl7R60_fpamHNT8mLQr5_x7WvxMcInRGowVsZqaKwSnX3lh3XoFH_OnhJLVMLY5zhezRd6-CCC8q5OMVPWO4');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+body::before {
+  content: '';
+  @apply absolute inset-0 bg-ink/60 backdrop-blur-[2px] z-[-1] fixed;
+}
